@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang="hu">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Fordulatszámkalkulátor CL</title>
+<meta name="description" content="Fordulatszám, kerületi sebesség és átmérő kalkulátor csiszolószerszámokhoz – Csiszolótárcsa WebShop">
+<meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#141416" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Fordulatszám CL">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<style>
+:root {
+  --brand: #AE0413; --brand-deep: #7A0A12;
+  --bg: #FFFFFF; --text: #1C1B1F; --muted: #5C5F66; --label: #3A3B40;
+  --surface: #FFFFFF; --input-bg: #F7F7F8; --head-bg: #F4F4F5;
+  --border: #D4D4D8; --divider: #E4E4E7; --nav-bg: #FAFAFA;
+  --accent-text: #AE0413; --soft-bg: #FBEAEC; --soft-text: #AE0413;
+  --warn-bg: #FFF4D6; --warn-border: #E8B33A; --warn-text: #6B4300;
+  --condensed: "Roboto Condensed", "Arial Narrow", "Helvetica Neue", system-ui, sans-serif;
+  color-scheme: light;
+}
+:root[data-theme="dark"] {
+  --bg: #141416; --text: #F2F2F4; --muted: #A9ABB3; --label: #D4D5DA;
+  --surface: #1F2024; --input-bg: #1F2024; --head-bg: #26272C;
+  --border: #45464E; --divider: #2C2D33; --nav-bg: #1A1B1E;
+  --accent-text: #FF7A82; --soft-bg: #3A1519; --soft-text: #FF9AA0;
+  --warn-bg: #3A2E0F; --warn-border: #A07A1F; --warn-text: #FFD87A;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body {
+  background: var(--bg); color: var(--text);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  -webkit-text-size-adjust: 100%; -webkit-tap-highlight-color: transparent;
+}
+a { color: var(--accent-text); }
+button { font: inherit; color: inherit; cursor: pointer; }
+svg { display: block; }
+.app { display: flex; flex-direction: column; height: 100vh; height: 100dvh; max-width: 560px; margin: 0 auto; }
+
+/* Fejléc */
+.top {
+  flex-shrink: 0; display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  padding: env(safe-area-inset-top) 12px 0 16px; min-height: calc(68px + env(safe-area-inset-top));
+  border-bottom: 1px solid var(--divider); background: var(--bg);
+}
+.logo { display: flex; padding: 3px 6px; border-radius: 8px; background: #FFFFFF; flex-shrink: 1; min-width: 0; }
+.logo img { width: 150px; max-width: 100%; height: auto; display: block; }
+.top-actions { display: flex; gap: 6px; flex-shrink: 0; }
+.round {
+  width: 48px; height: 48px; border-radius: 24px; border: 0; padding: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--soft-bg); color: var(--soft-text); text-decoration: none;
+}
+.round.neutral { background: var(--surface); color: var(--text); border: 1.5px solid var(--border); }
+
+/* Tartalom */
+main { flex: 1; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+.screen { padding: 14px 16px 20px; display: flex; flex-direction: column; gap: 12px; }
+.screen[hidden] { display: none; }
+.title-row { display: flex; align-items: center; gap: 8px; }
+h1 {
+  margin: 0; flex: 1; min-width: 0; font-family: var(--condensed); font-stretch: condensed;
+  font-size: 32px; font-weight: 700; line-height: 1.05;
+}
+.text-link {
+  height: 44px; display: inline-flex; align-items: center; gap: 6px; padding: 0 4px;
+  font-size: 15px; font-weight: 600; color: var(--accent-text); text-decoration: none; white-space: nowrap;
+  background: none; border: 0;
+}
+.lead { margin: 0; font-size: 15px; line-height: 1.35; color: var(--muted); }
+.field { display: flex; flex-direction: column; gap: 6px; }
+.label-row { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.label { font-size: 14px; font-weight: 600; color: var(--label); }
+.hint { font-size: 13px; font-weight: 600; color: var(--muted); white-space: nowrap; }
+
+.chips { display: flex; gap: 8px; overflow-x: auto; margin: 0 -16px; padding: 0 16px 2px; scrollbar-width: none; }
+.chips::-webkit-scrollbar { display: none; }
+.chip {
+  flex-shrink: 0; height: 44px; padding: 0 16px; border-radius: 22px; white-space: nowrap;
+  border: 1.5px solid var(--border); background: var(--surface); color: var(--text);
+  font-size: 15px; font-weight: 600;
+}
+.chip[aria-pressed="true"] { background: var(--brand); border-color: var(--brand); color: #FFFFFF; }
+.sizes { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; margin-top: 2px; }
+.sizes .chip { padding: 0; border-radius: 10px; font-size: 16px; }
+
+.input-wrap { position: relative; }
+.input-wrap input {
+  width: 100%; height: 60px; padding: 0 72px 0 16px; border-radius: 12px;
+  border: 1.5px solid var(--border); background: var(--input-bg); color: var(--text);
+  font: inherit; font-size: 24px; font-weight: 600; -webkit-appearance: none; appearance: none;
+}
+.input-wrap input:focus { outline: none; border: 2px solid var(--accent-text); }
+.input-wrap input.warn:not(:focus) { border-color: var(--warn-border); }
+.unit { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); font-size: 16px; font-weight: 600; color: var(--muted); pointer-events: none; }
+
+.result { padding: 14px 18px; border-radius: 16px; background: var(--brand); color: #FFFFFF; display: flex; flex-direction: column; gap: 4px; }
+.result.danger { background: var(--brand-deep); }
+.result-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-size: 14px; font-weight: 500; }
+.result-head .formula { font-size: 13px; opacity: 0.9; white-space: nowrap; }
+.result-value { display: flex; align-items: baseline; gap: 8px; }
+.result-value .num { font-family: var(--condensed); font-stretch: condensed; font-size: 48px; font-weight: 700; line-height: 1.05; }
+.result-value .u { font-size: 18px; font-weight: 600; }
+.result-foot { margin-top: 4px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.3); font-size: 14px; }
+
+.warning {
+  display: flex; gap: 10px; align-items: flex-start; padding: 10px 14px; border-radius: 12px;
+  border: 1.5px solid var(--warn-border); background: var(--warn-bg); color: var(--warn-text);
+  font-size: 14px; line-height: 1.35;
+}
+.warning[hidden] { display: none; }
+.warning svg { flex-shrink: 0; margin-top: 1px; }
+
+.shop {
+  min-height: 60px; padding: 8px 14px; border-radius: 14px; border: 1.5px solid var(--border);
+  background: var(--surface); color: var(--text); text-decoration: none;
+  display: flex; align-items: center; gap: 12px;
+}
+.shop .ic { width: 40px; height: 40px; border-radius: 20px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: var(--soft-bg); color: var(--soft-text); }
+.shop .txt { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.shop .small { font-size: 13px; color: var(--muted); }
+.shop .big { font-size: 16px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.shop .arrow { color: var(--accent-text); flex-shrink: 0; }
+
+/* Táblázat */
+.table { border: 1.5px solid var(--border); border-radius: 14px; overflow: hidden; background: var(--surface); }
+.table table { width: 100%; border-collapse: collapse; font-size: 15px; }
+.table th { background: var(--head-bg); color: var(--label); font-size: 13px; font-weight: 700; text-align: right; padding: 10px 14px 10px 4px; line-height: 1.25; }
+.table td { padding: 8px 14px 8px 4px; border-top: 1px solid var(--divider); text-align: right; height: 52px; font-variant-numeric: tabular-nums; }
+.table th:first-child, .table td:first-child { text-align: left; padding-left: 14px; font-weight: 600; }
+.table tbody th { background: transparent; color: var(--text); font-size: 15px; border-top: 1px solid var(--divider); height: 52px; padding-top: 8px; padding-bottom: 8px; }
+.table td.max { font-weight: 700; color: var(--accent-text); }
+
+/* Telepítési tipp */
+.install {
+  margin: 0 16px; padding: 12px 14px; border-radius: 12px; background: var(--soft-bg); color: var(--text);
+  display: flex; gap: 10px; align-items: center; font-size: 14px; line-height: 1.35;
+}
+.install[hidden] { display: none; }
+.install .grow { flex: 1; }
+.install button { border: 0; background: none; height: 44px; min-width: 44px; padding: 0 8px; font-weight: 700; color: var(--accent-text); }
+.install .primary { background: var(--brand); color: #FFFFFF; border-radius: 10px; padding: 0 14px; }
+
+/* Alsó navigáció */
+.nav {
+  flex-shrink: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+  border-top: 1px solid var(--divider); background: var(--nav-bg);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.nav a {
+  height: 84px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+  text-decoration: none; color: var(--muted); font-size: 13px; font-weight: 600;
+}
+.nav .pill { width: 64px; height: 34px; border-radius: 17px; display: flex; align-items: center; justify-content: center; }
+.nav a[aria-current="page"] { color: var(--accent-text); font-weight: 700; }
+.nav a[aria-current="page"] .pill { background: var(--soft-bg); }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-phone" viewBox="0 0 24 24"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></symbol>
+    <symbol id="i-mail" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 6l-10 7L2 6"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></symbol>
+    <symbol id="i-warn" viewBox="0 0 24 24"><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></symbol>
+    <symbol id="i-cart" viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"/></symbol>
+    <symbol id="i-right" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+    <symbol id="i-left" viewBox="0 0 24 24"><path d="M19 12H5M11 18l-6-6 6-6"/></symbol>
+    <symbol id="i-rpm" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 4v5h-5"/><path d="M12 12l3-3"/></symbol>
+    <symbol id="i-speed" viewBox="0 0 24 24"><path d="M4 18a9 9 0 1 1 16 0"/><path d="M12 15l4-6"/><circle cx="12" cy="15" r="1.2"/></symbol>
+    <symbol id="i-dia" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M5.6 18.4L18.4 5.6"/></symbol>
+  </defs>
+</svg>
+
+<div class="app">
+  <header class="top">
+    <a class="logo" href="https://www.csiszolotarcsawebshop.hu/" target="_blank" rel="noopener" aria-label="Csiszolótárcsa WebShop – webshop megnyitása">
+      <img src="logo.png" alt="Csiszolótárcsa WebShop" width="150" height="35">
+    </a>
+    <div class="top-actions">
+      <a class="round" href="tel:+36304827634" aria-label="Hívás: +36 30 482 7634">
+        <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-phone"/></svg>
+      </a>
+      <a class="round" href="mailto:rendeles@csiszolotarcsawebshop.hu?subject=%C3%89rdekl%C5%91d%C3%A9s%20%C3%A9rkezett%20az%20applik%C3%A1ci%C3%B3b%C3%B3l" aria-label="Email küldése">
+        <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-mail"/></svg>
+      </a>
+      <button type="button" class="round neutral" id="theme-btn" aria-label="Sötét mód">
+        <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use id="theme-icon" href="#i-moon"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main id="main">
+    <div class="install" id="install" hidden>
+      <div class="grow" id="install-text"></div>
+      <button type="button" class="primary" id="install-btn" hidden>Telepítés</button>
+      <button type="button" id="install-close" aria-label="Bezárás">✕</button>
+    </div>
+
+    <!-- 1. Fordulatszám -->
+    <section class="screen" id="fordulatszam" data-screen="rpm" aria-labelledby="h-rpm">
+      <div class="title-row">
+        <h1 id="h-rpm">Fordulatszám</h1>
+        <a class="text-link" href="#ajanlott"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-info"/></svg>Ajánlott értékek</a>
+      </div>
+      <div class="field">
+        <div class="label" id="rpm-tool-l">Szerszám típusa</div>
+        <div class="chips" data-tools="rpm" role="group" aria-labelledby="rpm-tool-l"></div>
+      </div>
+      <div class="field">
+        <label class="label" for="rpm-d">A csiszolószerszám átmérője</label>
+        <div class="input-wrap"><input id="rpm-d" inputmode="decimal" autocomplete="off" data-key="rpm.d"><span class="unit">mm</span></div>
+        <div class="sizes" data-sizes="rpm" role="group" aria-label="Gyakori átmérők"></div>
+      </div>
+      <div class="field">
+        <div class="label-row"><label class="label" for="rpm-v">Az elérni kívánt kerületi sebesség</label><span class="hint" data-out="rpm.max"></span></div>
+        <div class="input-wrap"><input id="rpm-v" inputmode="decimal" autocomplete="off" data-key="rpm.v"><span class="unit">m/s</span></div>
+      </div>
+      <div class="result" aria-live="polite">
+        <div class="result-head"><span>Szükséges fordulatszám</span><span class="formula">n = v · 60 000 / (π · d)</span></div>
+        <div class="result-value"><span class="num" data-out="rpm.result">–</span><span class="u">1/min</span></div>
+      </div>
+      <div class="warning" data-warn="rpm" role="alert" hidden>
+        <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-warn"/></svg>
+        <div><b>Túl nagy sebesség!</b> <span data-out="rpm.warn"></span></div>
+      </div>
+      <a class="shop" data-shop="rpm" href="https://www.csiszolotarcsawebshop.hu/" target="_blank" rel="noopener">
+        <span class="ic"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-cart"/></svg></span>
+        <span class="txt"><span class="small">Ilyen szerszámot keresel?</span><span class="big" data-out="rpm.shop"></span></span>
+        <svg class="arrow" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-right"/></svg>
+      </a>
+    </section>
+
+    <!-- 2. Kerületi sebesség -->
+    <section class="screen" id="kerulet" data-screen="spd" aria-labelledby="h-spd" hidden>
+      <div class="title-row">
+        <h1 id="h-spd">Kerületi sebesség</h1>
+        <a class="text-link" href="#ajanlott"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-info"/></svg>Ajánlott</a>
+      </div>
+      <div class="field">
+        <div class="label-row"><div class="label" id="spd-tool-l">Szerszám típusa</div><span class="hint" data-out="spd.max"></span></div>
+        <div class="chips" data-tools="spd" role="group" aria-labelledby="spd-tool-l"></div>
+      </div>
+      <div class="field">
+        <label class="label" for="spd-d">A csiszolószerszám átmérője</label>
+        <div class="input-wrap"><input id="spd-d" inputmode="decimal" autocomplete="off" data-key="spd.d"><span class="unit">mm</span></div>
+        <div class="sizes" data-sizes="spd" role="group" aria-label="Gyakori átmérők"></div>
+      </div>
+      <div class="field">
+        <label class="label" for="spd-n">A szerszám fordulatszáma</label>
+        <div class="input-wrap"><input id="spd-n" inputmode="decimal" autocomplete="off" data-key="spd.n"><span class="unit">1/min</span></div>
+      </div>
+      <div class="result" data-result="spd" aria-live="polite">
+        <div class="result-head"><span>Kerületi sebesség</span><span class="formula">v = π · d · n / 60 000</span></div>
+        <div class="result-value"><span class="num" data-out="spd.result">–</span><span class="u">m/s</span></div>
+      </div>
+      <div class="warning" data-warn="spd" role="alert" hidden>
+        <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-warn"/></svg>
+        <div><b>Balesetveszély!</b> <span data-out="spd.warn"></span></div>
+      </div>
+      <a class="shop" data-shop="spd" href="https://www.csiszolotarcsawebshop.hu/" target="_blank" rel="noopener">
+        <span class="ic"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-cart"/></svg></span>
+        <span class="txt"><span class="small">Ilyen szerszámot keresel?</span><span class="big" data-out="spd.shop"></span></span>
+        <svg class="arrow" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-right"/></svg>
+      </a>
+    </section>
+
+    <!-- 3. Átmérő -->
+    <section class="screen" id="atmero" data-screen="dia" aria-labelledby="h-dia" hidden>
+      <div class="title-row">
+        <h1 id="h-dia">Átmérő</h1>
+        <a class="text-link" href="#ajanlott"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-info"/></svg>Ajánlott értékek</a>
+      </div>
+      <div class="field">
+        <div class="label" id="dia-tool-l">Szerszám típusa</div>
+        <div class="chips" data-tools="dia" role="group" aria-labelledby="dia-tool-l"></div>
+      </div>
+      <div class="field">
+        <label class="label" for="dia-n">A szerszám (gép) fordulatszáma</label>
+        <div class="input-wrap"><input id="dia-n" inputmode="decimal" autocomplete="off" data-key="dia.n"><span class="unit">1/min</span></div>
+      </div>
+      <div class="field">
+        <div class="label-row"><label class="label" for="dia-v">Az elérni kívánt kerületi sebesség</label><span class="hint" data-out="dia.max"></span></div>
+        <div class="input-wrap"><input id="dia-v" inputmode="decimal" autocomplete="off" data-key="dia.v"><span class="unit">m/s</span></div>
+      </div>
+      <div class="result" aria-live="polite">
+        <div class="result-head"><span>Legnagyobb átmérő</span><span class="formula">d = v · 60 000 / (π · n)</span></div>
+        <div class="result-value"><span class="num" data-out="dia.result">–</span><span class="u">mm</span></div>
+        <div class="result-foot">Javasolt szabványos méret: <b data-out="dia.std">–</b></div>
+      </div>
+      <div class="warning" data-warn="dia" role="alert" hidden>
+        <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-warn"/></svg>
+        <div><b>Túl nagy sebesség!</b> <span data-out="dia.warn"></span></div>
+      </div>
+      <a class="shop" data-shop="dia" href="https://www.csiszolotarcsawebshop.hu/" target="_blank" rel="noopener">
+        <span class="ic"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-cart"/></svg></span>
+        <span class="txt"><span class="small">Ilyen szerszámot keresel?</span><span class="big" data-out="dia.shop"></span></span>
+        <svg class="arrow" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-right"/></svg>
+      </a>
+    </section>
+
+    <!-- 4. Ajánlott értékek -->
+    <section class="screen" id="ajanlott" data-screen="table" aria-labelledby="h-table" hidden>
+      <a class="text-link" href="#" id="back-link" style="align-self:flex-start;margin-left:-6px;font-size:16px">
+        <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-left"/></svg>Vissza
+      </a>
+      <div>
+        <h1 id="h-table">Ajánlott értékek</h1>
+        <p class="lead" style="margin-top:4px">Megengedett legnagyobb kerületi sebesség szerszámtípusonként, és az ebből adódó max. fordulatszám két gyakori átmérőnél.</p>
+      </div>
+      <div class="table">
+        <table>
+          <thead><tr><th scope="col">Szerszám</th><th scope="col">m/s</th><th scope="col">Ø125<br>1/min</th><th scope="col">Ø230<br>1/min</th></tr></thead>
+          <tbody id="table-body"></tbody>
+        </table>
+      </div>
+      <div class="warning">
+        <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-warn"/></svg>
+        <div><b>Figyelem!</b> A táblázat tájékoztató jellegű. Mindig a szerszámon feltüntetett legnagyobb kerületi sebesség és fordulatszám az irányadó.</div>
+      </div>
+    </section>
+  </main>
+
+  <nav class="nav" aria-label="Kalkulátorok">
+    <a href="#fordulatszam" data-tab="fordulatszam"><span class="pill"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-rpm"/></svg></span>Fordulatszám</a>
+    <a href="#kerulet" data-tab="kerulet"><span class="pill"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-speed"/></svg></span>Kerületi seb.</a>
+    <a href="#atmero" data-tab="atmero"><span class="pill"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#i-dia"/></svg></span>Átmérő</a>
+  </nav>
+</div>
+
+<script src="calc.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

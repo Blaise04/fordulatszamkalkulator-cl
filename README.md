@@ -13,6 +13,17 @@ Androidos fordulatszám-, kerületisebesség- és átmérő-kalkulátor a [Csisz
 - **Fejléc:** logó (a webshopra visz), hívás gomb (tárcsázó), email gomb („Érdeklődés érkezett az applikációból” tárggyal).
 - **Sötét mód** (alapból a telefon beállítását követi, a választás megmarad), kesztyűvel is nyomható, legalább 44–48 dp-s gombok.
 
+## Webes app iPhone-ra (és bármilyen telefonra)
+
+A `web/` mappában ugyanez a kalkulátor webes appként (PWA) is megvan. A **Webes app (GitHub Pages)** munkafolyamat minden változás után közzéteszi itt:
+
+https://blaise04.github.io/fordulatszamkalkulator-cl/
+
+- **iPhone:** nyisd meg Safariban → Megosztás gomb → „Főképernyőhöz adás”.
+- **Android:** Chrome-ban megjelenik a „Telepítés” gomb (vagy menü → „Alkalmazás telepítése”).
+
+Telepítés után saját ikonnal, teljes képernyőn fut, és internet nélkül is számol. Ha a webes appot frissíted, a `web/sw.js` fájlban a `CACHE` nevét is emeld (pl. `fkcl-v2`).
+
 ## APK készítése GitHubon
 
 1. Hozz létre egy új GitHub repót, és töltsd fel ide a mappa teljes tartalmát (a `.github` mappával együtt).
