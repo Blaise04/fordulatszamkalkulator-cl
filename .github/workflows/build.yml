@@ -6,6 +6,9 @@ on:
   pull_request:
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -62,6 +65,52 @@ jobs:
         with:
           name: FordulatszamkalkulatorCL-apk
           path: FordulatszamkalkulatorCL-${{ github.run_number }}.apk
+
+      # ---------- Nyilvános letöltés: GitHub Release ----------
+      # Aláíró kulccsal: végleges kiadás, a "latest" link erre mutat.
+      # Kulcs nélkül: teszt előzetes kiadás (prerelease), a "latest" linket nem írja felül.
+      - name: Release fájl előkészítése
+        if: github.event_name != 'pull_request'
+        run: |
+          mkdir -p release
+          if [ "$HAS_KEYSTORE" = "true" ]; then
+            cp "FordulatszamkalkulatorCL-${VERSION_CODE}.apk" release/FordulatszamkalkulatorCL.apk
+          else
+            cp "FordulatszamkalkulatorCL-${VERSION_CODE}-teszt.apk" release/FordulatszamkalkulatorCL-teszt.apk
+          fi
+
+      - name: GitHub Release – végleges
+        if: github.event_name != 'pull_request' && env.HAS_KEYSTORE == 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.0.${{ github.run_number }}
+          name: Fordulatszámkalkulátor CL 1.0.${{ github.run_number }}
+          target_commitish: ${{ github.sha }}
+          make_latest: 'true'
+          files: release/FordulatszamkalkulatorCL.apk
+          body: |
+            **Letöltés:** kattints lent a `FordulatszamkalkulatorCL.apk` fájlra, majd nyisd meg a telefonon.
+            Ha az Android rákérdez, engedélyezd a telepítést ebből a forrásból.
+
+            Állandó link a mindenkori legfrissebb verzióhoz:
+            https://github.com/${{ github.repository }}/releases/latest/download/FordulatszamkalkulatorCL.apk
+
+      - name: GitHub Release – teszt
+        if: github.event_name != 'pull_request' && env.HAS_KEYSTORE != 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.0.${{ github.run_number }}-teszt
+          name: Fordulatszámkalkulátor CL 1.0.${{ github.run_number }} (teszt)
+          target_commitish: ${{ github.sha }}
+          prerelease: true
+          make_latest: 'false'
+          files: release/FordulatszamkalkulatorCL-teszt.apk
+          body: |
+            **Teszt változat** – kipróbálásra. Nem a végleges aláíró kulccsal készült, ezért a végleges
+            kiadás előtt el kell távolítani a telefonról.
+
+            A végleges kiadásokhoz állítsd be az aláíró kulcsot (lásd README), utána az állandó link:
+            https://github.com/${{ github.repository }}/releases/latest/download/FordulatszamkalkulatorCL.apk
 
       - name: Tesztjelentés feltöltése hiba esetén
         if: failure()

@@ -21,6 +21,14 @@ Androidos fordulatszám-, kerületisebesség- és átmérő-kalkulátor a [Csisz
    - `FordulatszamkalkulatorCL-teszt-apk` – teszt APK, mindig elkészül. Telefonra telepíthető kipróbáláshoz.
    - `FordulatszamkalkulatorCL-apk` – végleges, aláírt APK, ha be van állítva a kiadási kulcs (lásd lent). Ezt érdemes a weboldalra feltenni.
 
+### Nyilvános letöltés (Releases)
+
+Minden `main` ágra feltöltés után a build a **Releases** oldalra is kiteszi az APK-t, ahonnan bárki letöltheti, bejelentkezés nélkül (ehhez a repónak nyilvánosnak kell lennie):
+
+- **Aláíró kulccsal:** végleges kiadás `FordulatszamkalkulatorCL.apk` néven. Az állandó, mindig a legfrissebb verzióra mutató link – ez mehet a weboldalra és QR-kódba:
+  `https://github.com/Blaise04/fordulatszamkalkulator-cl/releases/latest/download/FordulatszamkalkulatorCL.apk`
+- **Kulcs nélkül:** „teszt” előzetes kiadás (pre-release) `FordulatszamkalkulatorCL-teszt.apk` néven. Ez nem írja felül a fenti állandó linket.
+
 ### Kiadási aláíró kulcs (egyszer kell beállítani)
 
 A végleges APK-t egy saját kulccsal kell aláírni. **Ezt a kulcsot őrizd meg biztonságos helyen** – frissítést csak ugyanazzal a kulccsal aláírt APK-val lehet kiadni.
